@@ -59,7 +59,7 @@ The workflow sets `VITE_BASE_PATH` to `/<repository-name>/`; hash routing keeps 
 | --- | --- |
 | `src/app/`, `src/components/` | Routing, layout, shared controls |
 | `src/content/` | Typed movements and lessons |
-| `src/domain/` | Component schemas, kinematics, assembly rules |
+| `src/domain/` | Component schemas, gear alignment, kinematics, assembly rules |
 | `src/features/` | Explorer, academy, workbench, experiments |
 | `src/state/` | Simulation state and persistent preferences |
 | `src/tests/`, `e2e/` | Unit, component, and browser tests |
@@ -73,6 +73,7 @@ Progress and preferences use browser storage; simulation and workbench state res
 ## Model boundaries
 
 - Models are **generic educational assemblies**, not manufacturer CAD or validated engineering simulations. Some subcomponents are grouped.
+- Going-train and winding meshes use matching tooth counts, pitch-circle spacing, coplanar gear faces, and synchronized tooth phases. Compound pinions, bridge seats, and bearing centers share the same layout data. Tooth profiles remain illustrative rather than manufacturing geometry.
 - Mechanical timing uses an ideal 3 Hz balance and a simplified 48-hour energy reserve. Quartz uses 32,768 Hz divided to 1 Hz. Geometry, torque, winding efficiency, and contact behavior are illustrative.
 - Explosion has no collision solver; cutaway affects only the main plate. The rotor uses an accessible slider rather than direct mesh dragging.
 - The workbench teaches dependencies, not a complete physical service procedure. Real repairs require movement-specific instructions and safe handling of stored energy and delicate parts.

@@ -1,4 +1,5 @@
 import type { Part, Movement, MovementId, Shape, Category, Vec3 } from '../domain/types';
+import { alignMovement } from '../domain/alignment';
 const brass = '#b99a58', steel = '#aab4b7', ruby = '#bd4066';
 function p(id: string, name: string, shape: Shape, category: Category, position: Vec3, radius: number, explode: Vec3, role: string, engineering: string, connects: string[] = [], color = brass, thickness = .13, fault = 'Contamination or worn bearing surfaces can increase friction.'): Part {
   return { id, name, shape, category, position, radius, explode, role, engineering, connects, color, thickness, material: shape === 'jewel' ? 'Synthetic ruby' : color === brass ? 'Brass / steel assembly' : 'Steel / plated alloy', parent: category === 'Structure' ? undefined : 'plate', fault };
@@ -60,3 +61,4 @@ export const movements: Record<MovementId, Movement> = {
   quartz: {id:'quartz',name:'Analog quartz',code:'HL–03',subtitle:'A crystal-clear sense of time.',parts:quartzParts,frequency:32768,powerReserve:0,energyPath:['battery','contact','oscillator','divider','driver','coil','motor','fourth','motion','seconds'],gears:[{driver:'motor',driven:'fourth',driverTeeth:8,drivenTeeth:240}],provenance:{type:'generic educational',license:'MIT — original procedural geometry',referenceUrls}},
 };
 movements.automatic.gears = movements.manual.gears;
+for (const id of Object.keys(movements) as MovementId[]) movements[id] = alignMovement(movements[id]);

@@ -1,4 +1,4 @@
-﻿import type { Part, Vec3, MovementId } from './types';
+import type { Part, Vec3, MovementId } from './types';
 export const TAU = Math.PI * 2;
 export const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
 export function explodedPosition(part: Part, fraction: number): Vec3 {
@@ -23,7 +23,7 @@ export function advance(s: Simulation, dt: number, playing: boolean, speed: numb
   return { ...s, time: s.time + active, energy: movement === 'quartz' ? s.energy : clamp(s.energy - active / (48 * 3600)) };
 }
 export function wind(s: Simulation, turns: number): Simulation { return { ...s, energy: clamp(s.energy + Math.abs(turns) * .012), winding: s.winding + Math.abs(turns) * TAU }; }
-export function rotateRotor(s: Simulation, radians: number): Simulation { return { ...wind(s, radians / TAU * .15), rotor: s.rotor + radians }; }
+export function rotateRotor(s: Simulation, radians: number): Simulation { return { ...wind(s, radians / TAU * .15), rotor: s.rotor + radians, winding: s.winding + Math.abs(radians) / 3 }; }
 // Idealized 3 Hz lever: two releases per oscillation, 15-tooth escape wheel, half tooth per release.
 export function mechanism(time: number, movement: MovementId) {
   const beats = Math.floor((time + 1e-9) * 6);
@@ -33,9 +33,24 @@ export function mechanism(time: number, movement: MovementId) {
   const center = -third / 7.5;
   const barrel = -center / 8;
   const pulses = Math.floor(time + 1e-9);
-  return { balance: Math.sin(time * TAU * 3) * 4.3, fork: (beats % 2 ? 1 : -1) * .23,
+  return { balance: Math.sin(time * TAU * 3) * 4.3, fork: (beats % 2 ? 1 : -1) * .075,
     escape, fourth, third, center, barrel, seconds: movement === 'quartz' ? -pulses * TAU / 60 : -fourth,
     minute: movement === 'quartz' ? -pulses * TAU / 3600 : -center, hour: movement === 'quartz' ? -pulses * TAU / 43200 : -center / 12, motor: pulses * Math.PI, pulses, beats,
     phase: (time * 3 % 1), event: beats % 2 ? 'Exit pallet locked' : 'Entry pallet locked' };
+}
+
+/** Shared by the renderer and geometry/phase regression checks. */
+export function componentAngle(id: string, movement: MovementId, sim: Simulation): number {
+  const k = mechanism(sim.time, movement);
+  const angles: Record<string, number> = {
+    balance: k.balance, hairspring: k.balance * .035, fork: k.fork,
+    escape: k.escape, fourth: movement === 'quartz' ? k.seconds : k.fourth,
+    third: k.third, center: k.center, barrel: k.barrel,
+    seconds: k.seconds, minute: k.minute, hour: k.hour, motion: k.minute,
+    motor: k.motor, 'quartz-intermediate': -k.motor / 5, 'quartz-transfer': k.motor / 30,
+    rotor: sim.rotor, ratchet: -sim.winding,
+    reverser: -sim.winding * 5, reduction: sim.winding * 2.5,
+  };
+  return angles[id] ?? 0;
 }
 
